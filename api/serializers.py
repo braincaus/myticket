@@ -46,3 +46,9 @@ class HLBookSerializer(serializers.HyperlinkedModelSerializer):
         model = Book
         fields = ['id', 'url', 'event', 'status', ]
         read_only_fields = ['status']
+
+    def create(self, validated_data):
+        book = super(HLBookSerializer, self).create(validated_data=validated_data)
+        book.event.places_available -= 1
+        book.event.save()
+        return book

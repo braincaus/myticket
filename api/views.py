@@ -66,16 +66,18 @@ class BookViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == "GET":
-            self.serializer_class = HLBookSerializer
-        else:
-            self.serializer_class = BookSerializer
-        return super(BookViewSet, self).get_serializer_class()
-
-    def get_serializer(self, *args, **kwargs):
-        return super(BookViewSet, self).get_serializer()
+            return HLBookSerializer
+        return BookSerializer
 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
+
+    def get_queryset(self):
+        result = super(BookViewSet, self).get_queryset()
+        if not self.request.user.is_superuser:
+            result = result.filter(customer=self.request.user)
+
+        return result
 
     def create(self, request, *args, **kwargs):
         event = request.data.get('event', None)
@@ -93,12 +95,11 @@ class BookViewSet(ModelViewSet):
 
         return super(BookViewSet, self).create(request=request)
 
-    def get_queryset(self):
-        result = super(BookViewSet, self).get_queryset()
-        if not self.request.user.is_superuser:
-            result = result.filter(customer=self.request.user)
-
-        return result
+    def destroy(self, request, *args, **kwargs):
+        book = self.get_object()
+        book.event.places_available += 1
+        book.event.save()
+        return super(BookViewSet, self).destroy(request=request)
 
     @action(methods=['POST', 'GET'], detail=True, url_path='cancel', url_name='cancel_book')
     def cancel_book(self, request, pk):
