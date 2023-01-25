@@ -57,6 +57,17 @@ class EventViewSet(ModelViewSet):
             result = result.filter(type='public')
         return result
 
+    @action(methods=['GET'], detail=False, url_path='my_events', url_name='my_events')
+    def my_events(self, request):
+        events = Event.objects.filter(
+            book__customer=request.user,
+            book__status=True,
+            date__gte=datetime.today().date(),
+            status=True,
+        )
+        data = EventSerializer(instance=events, many=True, context={'request': request})
+        return Response(data=data.data, status=status.HTTP_200_OK)
+
 
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.filter(status=True)

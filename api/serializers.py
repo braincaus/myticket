@@ -19,7 +19,7 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = ['id', 'url', 'event', 'date', 'places_available']
 
     def create(self, validated_data):
         event = super(EventSerializer, self).create(validated_data=validated_data)
