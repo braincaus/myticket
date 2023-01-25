@@ -21,6 +21,7 @@ class Event(models.Model):
     event = models.CharField(max_length=250)
     type = models.CharField(max_length=10, default='public', choices=EVENT_TYPES)
     date = models.DateField()
+    places_available = models.IntegerField(default=0)
     status = models.BooleanField(default=True)
 
     def __str__(self):
